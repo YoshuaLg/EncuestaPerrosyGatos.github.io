@@ -1,1 +1,30 @@
-[]
+[
+  {
+    "voto": "perro",
+    "timestamp": "2026-02-05T05:41:35.501Z",
+    "public_ip": "177.248.47.127",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36 Edg/144.0.0.0",
+    "language": "es",
+    "platform": "Win32",
+    "screen": "1366x768",
+    "tiempo_decision_ms": 4938,
+    "click_x": 559,
+    "click_y": 288,
+    "referrer": "Directo",
+    "server_received_at": "2026-02-05T05:41:35.513Z"
+  },
+  {
+    "voto": "gato",
+    "timestamp": "2026-02-05T05:47:55.810Z",
+    "public_ip": "177.248.47.127",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36 Edg/144.0.0.0",
+    "language": "es",
+    "platform": "Win32",
+    "screen": "1366x768",
+    "tiempo_decision_ms": 40937,
+    "click_x": 935,
+    "click_y": 198,
+    "referrer": "Directo",
+    "server_received_at": "2026-02-05T05:47:55.812Z"
+  }
+]

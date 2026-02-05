@@ -2,14 +2,25 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 
-const PORT = 8080;
-const DATA_FILE = path.join(__dirname, 'votos.json');
+const PORT = process.env.PORT || 3000;
+const DATA_FILE = path.join(__dirname, '.data', 'votos.json'); // .data folder is persistent in Glitch
 const STATIC_DIR = __dirname;
-const ADMIN_PASS = 'admin123'; // Hardcoded como solicitado
+const ADMIN_PASS = 'admin123';
+
+// Ensure .data directory exists for Glitch persistence
+if (!fs.existsSync(path.join(__dirname, '.data'))) {
+    try {
+        fs.mkdirSync(path.join(__dirname, '.data'));
+    } catch (e) {
+        // Fallback for local if .data creation fails or not needed
+    }
+}
+// Fallback to root if .data write fails or for local compatibility
+const FINAL_DATA_FILE = fs.existsSync(path.join(__dirname, '.data')) ? DATA_FILE : path.join(__dirname, 'votos.json');
 
 // Inicializar archivo de datos si no existe
-if (!fs.existsSync(DATA_FILE)) {
-    fs.writeFileSync(DATA_FILE, JSON.stringify([]));
+if (!fs.existsSync(FINAL_DATA_FILE)) {
+    fs.writeFileSync(FINAL_DATA_FILE, JSON.stringify([]));
 }
 
 const server = http.createServer((req, res) => {
@@ -40,10 +51,18 @@ const server = http.createServer((req, res) => {
                 // Añadir timestamp de servidor para doble verificación
                 nuevoVoto.server_received_at = new Date().toISOString();
 
+                // MEJORA: Obtener IP real incluso detrás de proxies (Replit/Ngrok/Glitch)
+                const realIp = req.headers['x-forwarded-for'] ? req.headers['x-forwarded-for'].split(',')[0] : req.socket.remoteAddress;
+                // Si el cliente no mandó IP (falló fetch) o mandó una fake, usamos la del servidor
+                if (!nuevoVoto.public_ip || nuevoVoto.public_ip === 'Desconocida') {
+                    nuevoVoto.public_ip = realIp;
+                    nuevoVoto.ip_source = "Server-Extracted";
+                }
+
                 // Leer, actualizar y guardar
-                const data = JSON.parse(fs.readFileSync(DATA_FILE));
+                const data = JSON.parse(fs.readFileSync(FINAL_DATA_FILE));
                 data.push(nuevoVoto);
-                fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2));
+                fs.writeFileSync(FINAL_DATA_FILE, JSON.stringify(data, null, 2));
 
                 console.log(`[TRACKING] Nuevo dato capturado de IP: ${nuevoVoto.public_ip || 'Desconocida'}`);
 
@@ -79,7 +98,7 @@ const server = http.createServer((req, res) => {
         }
 
         // Si pasa, mostrar panel
-        const rawData = JSON.parse(fs.readFileSync(DATA_FILE));
+        const rawData = JSON.parse(fs.readFileSync(FINAL_DATA_FILE));
 
         // Generar HTML simple
         const html = `
@@ -155,7 +174,7 @@ const server = http.createServer((req, res) => {
             return;
         }
 
-        const data = fs.readFileSync(DATA_FILE);
+        const data = fs.readFileSync(FINAL_DATA_FILE);
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(data);
         return;
